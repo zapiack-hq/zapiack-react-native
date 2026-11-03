@@ -1,0 +1,72 @@
+{
+  "name": "@zapiack/react-native",
+  "version": "0.1.0",
+  "description": "Push notifications for React Native with Zapiack: register devices, follow taps and see what people do next.",
+  "license": "MIT",
+  "author": "Zapiack <support@zapiack.com>",
+  "homepage": "https://docs.zapiack.com/push/client-sdks",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zapiack-hq/zapiack-react-native.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zapiack-hq/zapiack-react-native/issues"
+  },
+  "keywords": [
+    "zapiack",
+    "react-native",
+    "push",
+    "notifications",
+    "fcm",
+    "apns"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "android",
+    "!android/build",
+    "!android/.gradle",
+    "ios",
+    "zapiack-react-native.podspec",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "sync-ios": "sh tool/sync-ios.sh",
+    "prepublishOnly": "npm run sync-ios && npm run typecheck && npm run build && npm test"
+  },
+  "peerDependencies": {
+    "react-native": ">=0.71.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "react-native": "^0.79.0",
+    "tsup": "^9.0.0",
+    "typescript": "~5.9.0",
+    "vitest": "^5.0.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
