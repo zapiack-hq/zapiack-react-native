@@ -46,8 +46,10 @@ public struct DeviceRegistration: Encodable {
     public var permission: String?
     public var environment: String?
     public var appVersion: String?
+    /// iOS 17.2+: the push-to-start token for Zapiack Live Activities, as hex. Absent leaves the one on file alone.
+    public var liveActivityToken: String?
 
-    public init(installationId: String, platform: String = "ios", token: String, externalUserId: String?? = nil, tags: [String: JSONValue]? = nil, permission: String? = nil, environment: String? = nil, appVersion: String? = nil) {
+    public init(installationId: String, platform: String = "ios", token: String, externalUserId: String?? = nil, tags: [String: JSONValue]? = nil, permission: String? = nil, environment: String? = nil, appVersion: String? = nil, liveActivityToken: String? = nil) {
         self.installationId = installationId
         self.platform = platform
         self.token = token
@@ -56,10 +58,11 @@ public struct DeviceRegistration: Encodable {
         self.permission = permission
         self.environment = environment
         self.appVersion = appVersion
+        self.liveActivityToken = liveActivityToken
     }
 
     private enum CodingKeys: String, CodingKey {
-        case installationId, platform, token, externalUserId, tags, permission, environment, appVersion
+        case installationId, platform, token, externalUserId, tags, permission, environment, appVersion, liveActivityToken
     }
 
     // An absent user leaves the link alone, a string links it, and an explicit null unlinks it, so all three are kept apart.
@@ -77,6 +80,7 @@ public struct DeviceRegistration: Encodable {
         try c.encodeIfPresent(permission, forKey: .permission)
         try c.encodeIfPresent(environment, forKey: .environment)
         try c.encodeIfPresent(appVersion, forKey: .appVersion)
+        try c.encodeIfPresent(liveActivityToken, forKey: .liveActivityToken)
     }
 }
 

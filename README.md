@@ -71,6 +71,96 @@ of them receives a push: call `ZapiackMessagingService.handle` from yours, as de
 }
 ```
 
+## Realtime
+
+Live messages over one WebSocket: chat, live updates, presence, and signalling for calls. It is separate from push; use either or both.
+
+Your app never holds an API key. Your **server** asks Zapiack for a short-lived token for the signed-in user (the key needs the **Realtime** scope, or no scope limits), and hands it to the app:
+
+```bash
+curl -X POST https://api.zapiack.com/v1/realtime/tokens \
+  -H "Authorization: Bearer $ZAPIACK_API_KEY" -H "Content-Type: application/json" \
+  -d '{"userId":"user_42","capabilities":{"chat:*":["subscribe","publish","presence"]}}'
+# → { "token": "eyJ…", "expiresAt": "…", "url": "wss://rt.zapiack.com/?token=eyJ…" }
+```
+
+`capabilities` says what that user may do on which channels (`*` matches anything): `subscribe`, `publish`, `presence`, `history`, `signal`. Tokens last an hour unless you ask for less (`ttlSeconds`, at most a day).
+
+In your app (plain JavaScript, no native setup):
+
+```ts
+import { ZapiackRealtime } from '@zapiack/react-native';
+
+const rt = new ZapiackRealtime({
+  // Ask YOUR server for a token. Called on every connect, so an expired token is replaced.
+  getToken: () => fetch('https://your.server/realtime-token').then((r) => r.text()),
+});
+await rt.connect();
+
+const stop = rt.subscribe('chat:room-1', (m) => console.log(m.from, m.data));
+await rt.publish('chat:room-1', { text: 'hi' }, { persist: true }); // resolves when the server confirms
+
+const here = rt.presence('chat:room-1');
+here.enter({ name: 'Ann' });
+here.onChange(({ action, member }) => console.log(action, member.user));
+rt.signal('call-7', otherConnectionId, 'offer', { sdp }); // to one connection
+rt.onError((e) => console.warn(e.code, e.message));
+```
+
+- **Reconnects by itself** with a growing, jittered pause, fetches a fresh token each time, re-joins every channel and replays what it missed since the last message it saw (publish with `persist` to make a message replayable). Messages already seen are not repeated.
+- **Sends made while offline** wait (up to 100) and go out in order once the line is back.
+- A message that cannot be replayed because the client was away longer than the project's retention is reported as an error with code 410: reload that channel's history over REST.
+- The project can refuse a client for good (Realtime switched off, or the connection was removed in the dashboard). Then `connect` fails with code 403 and it does not retry.
+
+## Voice and video calls
+
+Calls are a separate entry, so apps that only use push or messaging never load WebRTC.
+
+```
+npm install react-native-webrtc mediasoup-client react-native-incall-manager
+```
+
+Follow `react-native-webrtc`'s setup for your React Native version (camera and microphone permissions in `Info.plist` and `AndroidManifest.xml`, and the iOS pod install). Then:
+
+```tsx
+import { ZapiackCall } from '@zapiack/react-native/calls';
+import InCallManager from 'react-native-incall-manager';
+import { RTCView } from 'react-native-webrtc';
+
+const call = new ZapiackCall({
+  // Your server asks Zapiack for a token with POST /v1/calls/tokens (or starts the call with POST /v1/calls) and returns it here.
+  getToken: () => fetch('https://my-server.example/call-token').then((r) => r.text()),
+  // Earpiece, speaker and the phone's call mode.
+  audioSession: {
+    start: ({ media }) => InCallManager.start({ media }),
+    stop: () => InCallManager.stop(),
+    setSpeaker: (on) => InCallManager.setForceSpeakerphoneOn(on),
+  },
+});
+
+call.on('track', ({ identity, source, stream }) => setStreams((s) => ({ ...s, [`${identity}:${source}`]: stream.toURL() })));
+call.on('trackEnded', ({ identity, source }) => setStreams(({ [`${identity}:${source}`]: _gone, ...rest }) => rest));
+call.on('ended', ({ reason }) => navigation.goBack());
+
+await call.join();
+await call.enableMicrophone();
+await call.enableCamera();      // front camera; pass { camera: 'environment' } in the options for the back one
+call.setSpeaker(true);
+call.switchCamera();            // front <-> back, without interrupting the video
+await call.setMuted('audio', true);
+await call.leave();
+
+// <RTCView streamURL={streams['ada:video']} style={{ flex: 1 }} objectFit="cover" />
+```
+
+A person who is a `listener` in the token can receive but never send. Audio from other people plays by itself; only video needs an `RTCView`.
+
+A call also re-asks the server who is in the room every 30 seconds (`resyncMs` in the options, 0 turns it off), so an event that was missed costs seconds, not the rest of the call.
+
+On a phone the network changes under a call (Wi-Fi to mobile data, a lift, a tunnel). The client waits a few seconds for the connection to recover, then restarts it with fresh parameters from the server, and if the socket itself dropped it rejoins the room and picks up who is there now.
+
+**Not covered yet:** keeping a call alive in the background (iOS needs the `voip` background mode and CallKit; Android needs a foreground service) and screen sharing (`shareScreen` works once the Android foreground service and the iOS broadcast extension from `react-native-webrtc`'s guide are in place). Ringing a phone that is closed is done with push: see `POST /v1/calls`.
+
 ## Maintaining
 
 The iOS code in this package is copied from the iOS library: run `npm run sync-ios` after changing it (it also runs before publishing).

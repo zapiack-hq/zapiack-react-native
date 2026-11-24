@@ -22,6 +22,13 @@ public final class PushClient {
 
     public var deviceToken: String? { storage.string(forKey: "zapiack.token") }
 
+    /// The push-to-start token for Live Activities, when the app turned them on (iOS 17.2+).
+    public var liveActivityToken: String? { storage.string(forKey: "zapiack.live-token") }
+
+    public func setLiveActivityToken(_ data: Data) {
+        storage.set(data.map { String(format: "%02x", $0) }.joined(), forKey: "zapiack.live-token")
+    }
+
     public func setDeviceToken(_ data: Data) {
         storage.set(data.map { String(format: "%02x", $0) }.joined(), forKey: "zapiack.token")
     }
@@ -74,7 +81,8 @@ public final class PushClient {
             tags: tags.isEmpty ? nil : tags,
             permission: permission,
             environment: environment,
-            appVersion: appVersion
+            appVersion: appVersion,
+            liveActivityToken: liveActivityToken
         )
         try await api.register(registration)
         // Only forget the change if it is still the one that was sent.

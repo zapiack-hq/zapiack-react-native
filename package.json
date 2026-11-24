@@ -1,7 +1,7 @@
 {
   "name": "@zapiack/react-native",
-  "version": "0.1.0",
-  "description": "Push notifications for React Native with Zapiack: register devices, follow taps and see what people do next.",
+  "version": "0.2.0",
+  "description": "Push notifications, live messaging and voice & video calls for React Native with Zapiack.",
   "license": "MIT",
   "author": "Zapiack <support@zapiack.com>",
   "homepage": "https://docs.zapiack.com/push/client-sdks",
@@ -18,7 +18,12 @@
     "push",
     "notifications",
     "fcm",
-    "apns"
+    "apns",
+    "realtime",
+    "calls",
+    "webrtc",
+    "voice",
+    "video"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -34,7 +39,17 @@
         "default": "./dist/index.js"
       }
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./calls": {
+      "import": {
+        "types": "./dist/calls.d.mts",
+        "default": "./dist/calls.mjs"
+      },
+      "require": {
+        "types": "./dist/calls.d.ts",
+        "default": "./dist/calls.js"
+      }
+    }
   },
   "files": [
     "dist",
@@ -56,17 +71,29 @@
     "prepublishOnly": "npm run sync-ios && npm run typecheck && npm run build && npm test"
   },
   "peerDependencies": {
-    "react-native": ">=0.71.0"
+    "react-native": ">=0.71.0",
+    "react-native-webrtc": ">=124.0.0",
+    "mediasoup-client": "^3.18.0"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
+    "mediasoup-client": "^3.26.0",
     "react": "^19.0.0",
     "react-native": "^0.79.0",
+    "react-native-webrtc": "^124.0.8",
     "tsup": "^9.0.0",
     "typescript": "~5.9.0",
     "vitest": "^5.0.5"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "peerDependenciesMeta": {
+    "react-native-webrtc": {
+      "optional": true
+    },
+    "mediasoup-client": {
+      "optional": true
+    }
   }
 }

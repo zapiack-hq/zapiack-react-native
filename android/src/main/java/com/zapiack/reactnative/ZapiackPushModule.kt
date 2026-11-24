@@ -77,6 +77,9 @@ class ZapiackPushModule(private val reactContext: ReactApplicationContext) : Rea
 
     @ReactMethod fun flush(promise: Promise) { ZapiackPush.flush(); promise.resolve(null) }
 
+    /** Live Activities are iOS only; on Android a template's live parts are drawn in the notification with nothing to turn on. */
+    @ReactMethod fun enableLiveActivities(promise: Promise) { promise.resolve(null) }
+
     /** The tap that opened the app. The library takes a tap out of the intent when it handles it, so a second call finds nothing. */
     @ReactMethod
     fun initialTap(promise: Promise) {

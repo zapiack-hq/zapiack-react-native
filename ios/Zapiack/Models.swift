@@ -44,7 +44,7 @@ public struct PushBlock: Codable, Equatable {
 }
 
 /// A value of the app's own, sent along with an event.
-public enum JSONValue: Codable, Equatable {
+public enum JSONValue: Codable, Equatable, Sendable {
     case string(String)
     case number(Double)
     case bool(Bool)

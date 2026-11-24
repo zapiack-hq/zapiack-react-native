@@ -1,5 +1,8 @@
 import Foundation
 import UserNotifications
+#if canImport(ActivityKit) && os(iOS)
+import ActivityKit
+#endif
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -88,6 +91,30 @@ public final class ZapiackPush {
         Task { await self.client?.flush() }
         return credited
     }
+
+    /// Lets Zapiack start Live Activities on this phone: a template push with a timer or progress then appears on the lock screen
+    /// and in the Dynamic Island and counts down by itself. Needs iOS 17.2 or later, `NSSupportsLiveActivities` set to YES in the
+    /// app's Info.plist, and `ZapiackLiveActivityWidget` in a widget extension. On older iOS it does nothing, and those pushes
+    /// arrive as normal notifications.
+    public func enableLiveActivities() {
+        #if canImport(ActivityKit) && os(iOS)
+        if #available(iOS 17.2, *) {
+            guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+            liveTokenTask?.cancel()
+            liveTokenTask = Task { [weak self] in
+                for await token in Activity<ZapiackLiveAttributes>.pushToStartTokenUpdates {
+                    guard let self, let client = self.client else { continue }
+                    if client.liveActivityToken != token.map({ String(format: "%02x", $0) }).joined() {
+                        client.setLiveActivityToken(token)
+                        await self.syncRegistration()
+                    }
+                }
+            }
+        }
+        #endif
+    }
+
+    private var liveTokenTask: Task<Void, Never>?
 
     /// Sends anything waiting. Call when the app comes to the foreground.
     public func flush() async { await client?.flush() }

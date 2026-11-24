@@ -3,5 +3,10 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: { include: ['test/**/*.test.ts'], environment: 'node' },
-  resolve: { alias: { 'react-native': fileURLToPath(new URL('./test/react-native-mock.ts', import.meta.url)) } },
+  resolve: {
+    alias: {
+      'react-native-webrtc': fileURLToPath(new URL('./test/react-native-webrtc-mock.ts', import.meta.url)),
+      'react-native': fileURLToPath(new URL('./test/react-native-mock.ts', import.meta.url)),
+    },
+  },
 });

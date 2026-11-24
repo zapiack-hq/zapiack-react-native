@@ -72,6 +72,11 @@ final class ZapiackPushModule: RCTEventEmitter, UNUserNotificationCenterDelegate
         resolve(ZapiackPush.shared.track(name, properties: properties.map(Self.values)))
     }
 
+    @objc func enableLiveActivities(_ resolve: RCTPromiseResolveBlock, rejecter reject: RCTPromiseRejectBlock) {
+        ZapiackPush.shared.enableLiveActivities()
+        resolve(nil)
+    }
+
     @objc func flush(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: RCTPromiseRejectBlock) {
         Task { await ZapiackPush.shared.flush(); resolve(nil) }
     }

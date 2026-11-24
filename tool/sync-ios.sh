@@ -7,7 +7,7 @@ from="$here/../ios/Sources"
 to="$here/ios/Zapiack"
 rm -rf "$to"
 mkdir -p "$to"
-for f in "$from"/ZapiackCore/*.swift "$from"/ZapiackPush/*.swift; do
-  grep -v -e '^import ZapiackCore$' -e '^public typealias ' "$f" > "$to/$(basename "$f")"
+for f in "$from"/ZapiackCore/*.swift "$from"/ZapiackPush/*.swift "$from"/ZapiackLayout/*.swift "$from"/ZapiackLiveActivity/*.swift; do
+  grep -v -e '^import ZapiackCore$' -e '^import ZapiackLiveActivity$' -e '^import ZapiackLayout$' -e '^public typealias ' "$f" > "$to/$(basename "$f")"
 done
 echo "copied $(ls "$to" | wc -l | tr -d ' ') files"

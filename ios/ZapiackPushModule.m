@@ -13,6 +13,7 @@ RCT_EXTERN_METHOD(removeTags : (NSArray *)keys resolver : (RCTPromiseResolveBloc
 RCT_EXTERN_METHOD(screen : (NSString *)name resolver : (RCTPromiseResolveBlock)resolve rejecter : (RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(track : (NSString *)name properties : (NSDictionary *)properties resolver : (RCTPromiseResolveBlock)resolve rejecter : (RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(flush : (RCTPromiseResolveBlock)resolve rejecter : (RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(enableLiveActivities : (RCTPromiseResolveBlock)resolve rejecter : (RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(initialTap : (RCTPromiseResolveBlock)resolve rejecter : (RCTPromiseRejectBlock)reject)
 
 @end

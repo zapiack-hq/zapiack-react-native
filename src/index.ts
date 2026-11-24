@@ -43,6 +43,7 @@ interface NativeZapiack {
   screen(name: string): Promise<void>;
   track(name: string, properties: Record<string, unknown> | null): Promise<boolean>;
   flush(): Promise<void>;
+  enableLiveActivities(): Promise<void>;
   initialTap(): Promise<ZapiackTap | null>;
   addListener(event: string): void;
   removeListeners(count: number): void;
@@ -116,6 +117,15 @@ export const ZapiackPush = {
     return native().flush();
   },
 
+  /**
+   * Lets Zapiack start Live Activities on iOS 17.2 and later: a template push with a timer or progress then counts down on the lock
+   * screen and in the Dynamic Island. Also add ZapiackLiveActivityWidget to a widget extension (see the iOS README). Does nothing on
+   * Android, where those pushes are drawn in the notification itself.
+   */
+  enableLiveActivities(): Promise<void> {
+    return native().enableLiveActivities();
+  },
+
   /** Notifications tapped while the app is running. Returns a function that stops listening. */
   onTap(listener: (tap: ZapiackTap) => void): () => void {
     const module = native();
@@ -131,3 +141,10 @@ export const ZapiackPush = {
 };
 
 export default ZapiackPush;
+
+/**
+ * Live messages over one WebSocket: `new ZapiackRealtime({ getToken })`, where `getToken` asks your server for a token minted with your
+ * API key. Pure JavaScript, so it needs no native setup. Separate from push: use either, or both.
+ */
+export { ZapiackRealtime, ZapiackRealtimeError, browserRealtimeEnv, DEFAULT_REALTIME_URL } from './realtime';
+export type { PresenceMember, PublishOptions, PublishResult, RealtimeEnv, RealtimeMessage, RealtimeOptions, RealtimeState, SocketLike } from './realtime';

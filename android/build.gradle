@@ -44,5 +44,5 @@ repositories {
 dependencies {
     // The version comes from the app's React Native Gradle plugin.
     implementation "com.facebook.react:react-android"
-    api "com.zapiack:zapiack-android:0.1.0"
+    api "com.zapiack:zapiack-android:0.2.0"
 }
